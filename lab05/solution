@@ -1,0 +1,18 @@
+The problem was that Bob’s real public key was already present in the same local keyring,
+so GPG always used the legitimate Bob key. I fixed this by creating a separate GPG home directory for 
+Alice and importing only Alice’s key and the substituted attacker key. This allowed the message to be encrypted 
+with the wrong public key and demonstrated how a MITM attack can succeed if fingerprints are not verified.
+
+
+Why doesn’t GPG detect MITM attacks automatically?
+GPG cannot know whether the imported key really belongs to the intended person. It can only warn that the key is not trusted.
+
+What is a fingerprint and why is it important?
+A fingerprint is a unique identifier of a public key. It is important because it allows users to verify that 
+the correct key was received.
+
+Why is email not a secure channel for exchanging keys?
+Email is not secure because an attacker can replace the public key during transmission.
+
+How does the Web of Trust reduce the risk of MITM attacks?
+The Web of Trust reduces risk by allowing verified keys to be trusted and signed, making fake keys easier to detect.
