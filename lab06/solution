@@ -1,0 +1,14 @@
+Why don't secrets belong in the source code?
+Secrets do not belong in source code because repositories can be shared, leaked, or uploaded by mistake. 
+If secrets are stored in plain text, attackers can use them immediately.
+
+What is the difference between symmetric and asymmetric secret encryption?
+Symmetric encryption uses the same password for encryption and decryption. 
+Asymmetric encryption uses a public key for encryption and a private key for decryption.
+
+What happens if we lose the private key?
+If we lose the private key, encrypted data can no longer be decrypted. This can result in permanent loss
+of access to the protected secrets.
+
+How would you handle this in a larger enterprise?
+In a larger enterprise, secrets should be managed with dedicated tools such as HashiCorp Vault, AWS Secrets Manager, or SOPS. Access should be controlled centrally and limited to authorized users and systems only.
