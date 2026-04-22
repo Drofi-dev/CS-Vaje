@@ -1,0 +1,14 @@
+Difference between encryption and signing
+
+Encryption protects the content of the file so that only the intended recipient can read it.
+Signing proves who created the message and confirms that the content was not changed.
+
+Role of public and private key
+
+The public key is shared with others and is used to encrypt data or verify a signature. 
+The private key is secret and is used to decrypt data and create a digital signature.
+
+What happens when an encrypted file is modified
+
+If an encrypted file is modified, decryption may fail or the output may be corrupted.
+If the file was also signed, GPG will report that the signature is not valid, which shows that the file was changed.
