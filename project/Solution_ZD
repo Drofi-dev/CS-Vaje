@@ -1,0 +1,228 @@
+# 🛡️ Empirical Project: SSH Security Weakness Study
+
+## 📌 Introduction
+
+The purpose of this project was to perform an empirical analysis of SSH security by simulating brute-force and dictionary attacks against an SSH service running inside Docker.
+
+The project focused on understanding how password strength and defensive behavior affect resistance against automated attacks. Different SSH user configurations were tested using Hydra, while Nmap was used for reconnaissance and service identification.
+
+The experiment was performed only in a controlled local Docker environment.
+
+---
+
+# 🧪 Methodology
+
+## Environment Setup
+
+The SSH server was deployed using Docker Compose.
+
+### Start the environment
+
+```bash
+docker compose up -d
+```
+
+### Connect to the SSH server
+
+```bash
+ssh student@localhost -p 2222
+```
+
+Default credentials:
+
+* Username: `student`
+* Password: `password123`
+
+---
+
+## Additional Test Users
+
+Additional users with different password strengths were created for the experiment.
+
+| User       | Password         | Purpose       |
+| ---------- | ---------------- | ------------- |
+| weakuser   | 123456           | Easy to crack |
+| mediumuser | Password123      | Moderate      |
+| stronguser | Str0ng!Pass#2026 | Hard to crack |
+
+---
+
+# 🛠️ Tools Used
+
+| Tool           | Purpose                              |
+| -------------- | ------------------------------------ |
+| Docker         | SSH lab environment                  |
+| OpenSSH        | SSH service                          |
+| Nmap           | Reconnaissance and service detection |
+| Hydra          | Brute-force / dictionary attacks     |
+| Kali Linux WSL | Linux attack environment             |
+
+---
+
+# 🔍 Reconnaissance
+
+The SSH service was identified using Nmap.
+
+### Command used
+
+```bash
+nmap -sV -p 2222 localhost
+```
+
+### Result
+
+| Port     | State | Service | Version      |
+| -------- | ----- | ------- | ------------ |
+| 2222/tcp | open  | ssh     | OpenSSH 10.2 |
+
+The scan confirmed that the SSH service was reachable and exposed on port 2222.
+
+---
+
+# ⚔️ Brute-Force Experiments
+
+## Weak Password Test
+
+### Command
+
+```bash
+time hydra -l weakuser -P passwords.txt ssh://localhost:2222
+```
+
+### Result
+
+Hydra successfully discovered the password:
+
+```text
+login: weakuser
+password: 123456
+```
+
+### Time
+
+```text
+0.829s
+```
+
+### Analysis
+
+The weak password was cracked almost instantly because it existed in the attacker dictionary. This demonstrates how dangerous predictable passwords are against automated attacks.
+
+---
+
+## Medium Password Test
+
+### Command
+
+```bash
+time hydra -l mediumuser -P passwords.txt ssh://localhost:2222
+```
+
+### Result
+
+```text
+0 valid password found
+```
+
+### Time
+
+```text
+0.693s
+```
+
+### Analysis
+
+The attack failed because the password was not included in the provided dictionary file. This demonstrates that dictionary attacks heavily depend on reused and predictable passwords.
+
+---
+
+## Strong Password Test
+
+### Command
+
+```bash
+time hydra -t 4 -l stronguser -P passwords.txt ssh://localhost:2222
+```
+
+### Result
+
+```text
+0 valid password found
+```
+
+### Time
+
+```text
+32.707s
+```
+
+### Analysis
+
+The strong password resisted the attack successfully. The attack also required significantly more time because the number of parallel Hydra tasks was reduced to maintain stable SSH connections.
+
+---
+
+# 📊 Results Table
+
+| Configuration | Username   | Password Strength | Protection | Result  | Time     |
+| ------------- | ---------- | ----------------- | ---------- | ------- | -------- |
+| Config 1      | weakuser   | Weak              | None       | Cracked | 0.829 s  |
+| Config 2      | mediumuser | Medium            | None       | Failed  | 0.693 s  |
+| Config 3      | stronguser | Strong            | None       | Failed  | 32.707 s |
+
+---
+
+# 🧠 Discussion
+
+## Impact of Password Strength
+
+The experiment clearly showed that weak passwords are extremely vulnerable to automated attacks. The weak account was compromised almost immediately because the password existed in the attacker dictionary.
+
+Medium and strong passwords significantly improved resistance because the passwords were not present in the wordlist.
+
+---
+
+## Dictionary Attack vs Brute Force
+
+The experiments primarily demonstrated dictionary attacks rather than full brute-force attacks. Hydra tested passwords from a predefined list instead of generating all possible combinations.
+
+This reflects real-world attacks where attackers often rely on leaked password databases and common credential reuse.
+
+---
+
+## Security vs Usability
+
+Strong passwords improve security but may reduce usability because they are harder to remember. Organizations must balance convenience and security when defining password policies.
+
+---
+
+## Effect of Rate Limiting and fail2ban
+
+Although fail2ban was not fully implemented during the experiment, the project demonstrated that SSH services may become unstable or disconnect aggressive parallel attacks.
+
+Fail2ban would improve security by temporarily blocking IP addresses after repeated failed login attempts. However, it would not completely prevent attacks because attackers could:
+
+* use rotating IP addresses,
+* slow down attack speed,
+* use stolen credentials instead of guessing passwords.
+
+---
+
+# ✅ Recommendations
+
+1. Use strong and unique passwords for all SSH accounts.
+2. Enable fail2ban or similar rate-limiting protections.
+3. Use SSH key authentication instead of password authentication whenever possible.
+4. Restrict SSH access using firewall rules and trusted IP addresses.
+5. Monitor SSH logs regularly for suspicious login attempts.
+
+---
+
+# 📌 Conclusion
+
+The project successfully demonstrated how password strength affects SSH security.
+
+Weak passwords were compromised almost instantly using automated dictionary attacks, while stronger passwords significantly improved resistance. The results also showed that attack stability and effectiveness may depend on SSH connection handling and defensive mechanisms.
+
+The experiment confirmed that strong passwords, SSH hardening, and additional protections such as fail2ban are essential for protecting SSH services against automated attacks.
+
